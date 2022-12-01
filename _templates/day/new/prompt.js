@@ -3,9 +3,20 @@ const process = require('process');
 module.exports = {
   prompt: ({ prompter }) => {
     return new Promise(resolve => {
-      if (process.argv.includes('--day')) {
+      const day = process.argv.includes('--day')
+        ? process.argv[process.argv.indexOf('--day') + 1]
+        : undefined;
+      const extension = process.argv.includes('--extension')
+        ? process.argv[process.argv.indexOf('--extension') + 1]
+        : undefined;
+
+      if (
+        process.argv.includes('--day') &&
+        process.argv.includes('--extension')
+      ) {
         return resolve({
-          day: process.argv[process.argv.indexOf('--day') + 1].padStart(2, '0'),
+          day: day.padStart(2, '0'),
+          ext: extension.toLowerCase() === 'typescript' ? 'ts' : 'js',
         });
       }
 
@@ -15,13 +26,19 @@ module.exports = {
             type: 'input',
             name: 'day',
             message: 'Which day should we add?',
-            initial: `${new Date().getDate()}`.padStart(2, '0'),
+            initial: day
+              ? day.padStart(2, '0')
+              : `${new Date().getDate()}`.padStart(2, '0'),
           },
           {
             type: 'select',
             name: 'extension',
             message: 'Which language would you like?',
             choices: ['JavaScript', 'TypeScript'],
+            initial:
+              (extension || '').toLocaleLowerCase() === 'typescript'
+                ? 'TypeScript'
+                : 'JavaScript',
           },
         ])
         .then(({ day, extension }) => {
